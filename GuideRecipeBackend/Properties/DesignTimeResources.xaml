@@ -1,0 +1,12 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/GO.Windows.Styles;component/GO.Shared.xaml" />
+       	<ResourceDictionary Source="/GO.Windows.Styles;component/Touch/Color.Dark.xaml" />
+ 
+        <!-- Insert other resources after this -->
+ 
+    </ResourceDictionary.MergedDictionaries>
+
+</ResourceDictionary>
