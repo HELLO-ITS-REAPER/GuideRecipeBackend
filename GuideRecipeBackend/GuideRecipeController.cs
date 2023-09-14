@@ -21,9 +21,10 @@ namespace GuideRecipeBackend
         public GuideRecipeController()
         {
             FuncSet.Add("getAllRecipes", onGetAllRecipes);
+            FuncSet.Add("getRecipe", onGetRecipe);
             FuncSet.Add("getActionTypes", onGetActionTypes);
             FuncSet.Add("getActionData", onGetActionData);
-            FuncSet.Add("getRecipe", onGetRecipe);
+            FuncSet.Add("getRecipeActions", onGetRecipeActions);
         }
 
         [HttpPost]
@@ -46,6 +47,30 @@ namespace GuideRecipeBackend
             return man.Recipes;
         }
 
+
+
+        private object onGetRecipe(dynamic arg)
+        {
+            var man = ServiceManager.GetService<GuideManager>();
+            var success = Guid.TryParse((string)arg.actionId, out Guid actionId);
+            var recipe = man.LoadRecipe(actionId);
+            return recipe;
+        }
+
+        private object onGetRecipeActions(dynamic arg)
+        {
+            var man = ServiceManager.GetService<GuideManager>();
+            var success = Guid.TryParse((string)arg.actionId, out Guid actionId);
+
+            var result = new List<ActionPropertyInfo>();
+            var action = man.LoadAction(actionId);
+            foreach (var item in action.GetInfo().Properties)
+            {
+                result.Add(item);
+            }
+            return action;
+        }
+
         private object onGetActionData(dynamic arg)
         {
             var man = ServiceManager.GetService<GuideManager>();
@@ -66,15 +91,6 @@ namespace GuideRecipeBackend
             }
             return result;
         }
-
-        private object onGetRecipe(dynamic arg)
-        {
-            var man = ServiceManager.GetService<GuideManager>();
-            var success = Guid.TryParse((string)arg.actionId, out Guid actionId);
-            var action = man.LoadRecipe(actionId);
-            return action;
-        }
-        
 
         private object onGetActionTypes(dynamic arg)
         {
