@@ -23,7 +23,7 @@ namespace GuideRecipeBackend
             FuncSet.Add("getAllRecipes", onGetAllRecipes);
             FuncSet.Add("getRecipe", onGetRecipe);
             FuncSet.Add("getActionTypes", onGetActionTypes);
-            FuncSet.Add("getActionData", onGetActionData);
+            //FuncSet.Add("getActionData", onGetActionData);
             FuncSet.Add("getRecipeActions", onGetRecipeActions);
         }
 
@@ -62,34 +62,25 @@ namespace GuideRecipeBackend
             var man = ServiceManager.GetService<GuideManager>();
             var success = Guid.TryParse((string)arg.actionId, out Guid actionId);
 
-            var result = new List<ActionPropertyInfo>();
-            var action = man.LoadAction(actionId);
-            foreach (var item in action.GetInfo().Properties)
-            {
-                result.Add(item);
-            }
-            return action;
-        }
+            var loadedAction = (ICompositeAction)man.LoadAction(actionId);
 
-        private object onGetActionData(dynamic arg)
-        {
-            var man = ServiceManager.GetService<GuideManager>();
-            var result = new List<ActionData>();
+            var actions = loadedAction.Actions;
 
-            foreach (var action in man.ActionTypes)
+            var actionsList = new List<ActionData>();
+
+            foreach (var action in actions)
             {
                 var actionData = new ActionData
                 {
-                    AssemblyBaseName = action.AssemblyQualifiedName,
+                    AssemblyBaseName = action.Name,
                     Name = action.Name,
-                    TypeName = action.FullName,
-                    //// You should populate these properties as needed
-                    //InputParameters = new List<ActionParameterData>(), // Example initialization
-                    //OutputParameters = new List<ActionParameterData>(), // Example initialization
                 };
-                result.Add(actionData);
+
+                actionsList.Add(actionData);
             }
-            return result;
+
+
+            return actionsList;
         }
 
         private object onGetActionTypes(dynamic arg)
