@@ -119,8 +119,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>call "$(ProjectDir)script.bat"
-</PostBuildEvent>
+    <PostBuildEvent>powershell.exe -File "$(SolutionDir)scripts\buildScript_Stop.ps1"
+xcopy /Y "$(TargetPath)" "C:\Users\UserA\Desktop\Vertex\GO - ServerDeviceCenter"
+xcopy /Y "$(TargetDir)$(TargetName).pdb" "C:\Users\UserA\Desktop\Vertex\GO - ServerDeviceCenter"
+powershell.exe -File "$(SolutionDir)scripts\buildScript_Start.ps1"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -4,6 +4,7 @@ using GO.Guide.Actions;
 using GO.Guide.Actions.Serialization;
 using GO.Guide.DataLayer;
 using GO.Owin;
+using GO.Threading;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +14,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Filters;
 
 namespace GuideRecipeBackend
 {
@@ -21,9 +23,7 @@ namespace GuideRecipeBackend
         public GuideRecipeController()
         {
             FuncSet.Add("getAllRecipes", onGetAllRecipes);
-            FuncSet.Add("getRecipe", onGetRecipe);
             FuncSet.Add("getActionTypes", onGetActionTypes);
-            //FuncSet.Add("getActionData", onGetActionData);
             FuncSet.Add("getRecipeActions", onGetRecipeActions);
         }
 
@@ -47,38 +47,40 @@ namespace GuideRecipeBackend
             return man.Recipes;
         }
 
-
-
-        private object onGetRecipe(dynamic arg)
-        {
-            var man = ServiceManager.GetService<GuideManager>();
-            var success = Guid.TryParse((string)arg.actionId, out Guid actionId);
-            var recipe = man.LoadRecipe(actionId);
-            return recipe;
-        }
-
         private object onGetRecipeActions(dynamic arg)
         {
             var man = ServiceManager.GetService<GuideManager>();
             var success = Guid.TryParse((string)arg.actionId, out Guid actionId);
 
             var loadedAction = (ICompositeAction)man.LoadAction(actionId);
-
             var actions = loadedAction.Actions;
-
             var actionsList = new List<ActionData>();
 
             foreach (var action in actions)
             {
+                var info = action.GetInfo();
                 var actionData = new ActionData
                 {
-                    AssemblyBaseName = action.Name,
+                    AssemblyBaseName = info.Name,
                     Name = action.Name,
+                    TypeName = action.Name,
+                    ChildAction = null
                 };
+
+                if (action is ICompositeAction)
+                {
+                    var child = (ICompositeAction)action;
+                    var childActions = child.Actions;
+                }
+
+
+                //foreach (var child in )
+                //{
+
+                //}
 
                 actionsList.Add(actionData);
             }
-
 
             return actionsList;
         }
@@ -130,7 +132,7 @@ namespace GuideRecipeBackend
             public string TypeName { get; set; }
             public List<ActionParameterData> InputParameters { get; set; } = new List<ActionParameterData>();
             public List<ActionParameterData> OutputParameters { get; set; } = new List<ActionParameterData>();
-
+            public List<ActionData> ChildAction { get; set; }
         }
 
         private class ActionParameterData
