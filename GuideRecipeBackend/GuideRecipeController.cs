@@ -54,7 +54,7 @@ namespace GuideRecipeBackend
 
             var loadedAction = (ICompositeAction)man.LoadAction(actionId);
             var actions = loadedAction.Actions;
-            var actionsList = new List<ActionData>();
+            List<ActionData> actionsList = new List<ActionData>();
 
             foreach (var action in actions)
             {
@@ -64,20 +64,18 @@ namespace GuideRecipeBackend
                     AssemblyBaseName = info.Name,
                     Name = action.Name,
                     TypeName = action.Name,
-                    ChildAction = null
                 };
 
-                if (action is ICompositeAction)
+                if (action is ICompositeAction compositeAction)
                 {
-                    var child = (ICompositeAction)action;
-                    var childActions = child.Actions;
+                    ActionData childActionData = new ActionData()
+                    {
+                        Name = compositeAction.Actions[0].Name,
+                        AssemblyBaseName = compositeAction.Actions[0].GetInfo().AssemblyBaseName,
+                        TypeName = compositeAction.Actions[0].GetInfo().TypeFullName,
+                    };
+                    actionData.Actions.Add(childActionData);
                 }
-
-
-                //foreach (var child in )
-                //{
-
-                //}
 
                 actionsList.Add(actionData);
             }
@@ -132,7 +130,7 @@ namespace GuideRecipeBackend
             public string TypeName { get; set; }
             public List<ActionParameterData> InputParameters { get; set; } = new List<ActionParameterData>();
             public List<ActionParameterData> OutputParameters { get; set; } = new List<ActionParameterData>();
-            public List<ActionData> ChildAction { get; set; }
+            public List<ActionData> Actions { get; set; } = new List<ActionData>();
         }
 
         private class ActionParameterData
