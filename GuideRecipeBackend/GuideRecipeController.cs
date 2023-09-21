@@ -53,37 +53,47 @@ namespace GuideRecipeBackend
             var success = Guid.TryParse((string)arg.actionId, out Guid actionId);
 
             var loadedAction = (ICompositeAction)man.LoadAction(actionId);
-            var actions = loadedAction.Actions;
-            var actionsList = new List<ActionData>();
+            List<ActionData> actionsList = new List<ActionData>();
 
-            foreach (var action in actions)
+            foreach (var action in loadedAction.Actions)
             {
-                var info = action.GetInfo();
                 var actionData = new ActionData
                 {
-                    AssemblyBaseName = info.Name,
+                    AssemblyBaseName = action.GetInfo().Name,
                     Name = action.Name,
                     TypeName = action.Name,
-                    ChildAction = null
                 };
 
-                if (action is ICompositeAction)
-                {
-                    var child = (ICompositeAction)action;
-                    var childActions = child.Actions;
-                }
-
-
-                //foreach (var child in )
-                //{
-
-                //}
+                CollectRecipeActionChilds(action, actionData);
 
                 actionsList.Add(actionData);
             }
 
             return actionsList;
         }
+
+        private void CollectRecipeActionChilds(IAction action, ActionData parentActionData)
+        {
+            var info = action.GetInfo();
+            var actionData = new ActionData
+            {
+                AssemblyBaseName = info.Name,
+                Name = action.Name,
+                TypeName = action.Name,
+            };
+
+            if (action is ICompositeAction compositeAction)
+            {
+                foreach (var nestedAction in compositeAction.Actions)
+                {
+                    CollectRecipeActionChilds(nestedAction, actionData);
+                }
+            }
+
+            parentActionData.Actions.Add(actionData);
+        }
+
+
 
         private object onGetActionTypes(dynamic arg)
         {
@@ -132,7 +142,7 @@ namespace GuideRecipeBackend
             public string TypeName { get; set; }
             public List<ActionParameterData> InputParameters { get; set; } = new List<ActionParameterData>();
             public List<ActionParameterData> OutputParameters { get; set; } = new List<ActionParameterData>();
-            public List<ActionData> ChildAction { get; set; }
+            public List<ActionData> Actions { get; set; } = new List<ActionData>();
         }
 
         private class ActionParameterData
