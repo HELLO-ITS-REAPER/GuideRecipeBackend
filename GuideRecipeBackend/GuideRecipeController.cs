@@ -55,44 +55,30 @@ namespace GuideRecipeBackend
             var loadedAction = (ICompositeAction)man.LoadAction(actionId);
             List<ActionData> actionsList = new List<ActionData>();
 
-            foreach (var action in loadedAction.Actions)
-            {
-                var actionData = new ActionData
-                {
-                    AssemblyBaseName = action.GetInfo().Name,
-                    Name = action.Name,
-                    TypeName = action.Name,
-                };
-
-                CollectRecipeActionChilds(action, actionData);
-
-                actionsList.Add(actionData);
-            }
+            CollectRecipeActionChilds(loadedAction, actionsList);
 
             return actionsList;
         }
 
-        private void CollectRecipeActionChilds(IAction action, ActionData parentActionData)
+        private void CollectRecipeActionChilds(ICompositeAction compositeAction, List<ActionData> actionsList)
         {
-            var info = action.GetInfo();
-            var actionData = new ActionData
+            foreach (var action in compositeAction.Actions)
             {
-                AssemblyBaseName = info.Name,
-                Name = action.Name,
-                TypeName = action.Name,
-            };
-
-            if (action is ICompositeAction compositeAction)
-            {
-                foreach (var nestedAction in compositeAction.Actions)
+                var actionData = new ActionData
                 {
-                    CollectRecipeActionChilds(nestedAction, actionData);
+                    AssemblyBaseName = action.GetInfo().AssemblyBaseName,
+                    Name = action.GetInfo().Name,
+                    TypeName = action.GetInfo().TypeFullName,
+                };
+
+                if (action is ICompositeAction nestedCompositeAction)
+                {
+                    CollectRecipeActionChilds(nestedCompositeAction, actionData.Actions);
                 }
+
+                actionsList.Add(actionData);
             }
-
-            parentActionData.Actions.Add(actionData);
         }
-
 
 
         private object onGetActionTypes(dynamic arg)
