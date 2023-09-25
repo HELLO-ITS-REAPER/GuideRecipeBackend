@@ -25,6 +25,7 @@ namespace GuideRecipeBackend
             FuncSet.Add("getAllRecipes", onGetAllRecipes);
             FuncSet.Add("getActionTypes", onGetActionTypes);
             FuncSet.Add("getRecipeActions", onGetRecipeActions);
+            FuncSet.Add("getActionParameters", onGetActionParameters);
         }
 
         [HttpPost]
@@ -55,6 +56,7 @@ namespace GuideRecipeBackend
             var loadedAction = (ICompositeAction)man.LoadAction(actionId);
             List<ActionData> actionsList = new List<ActionData>();
 
+            // Remember to make safety in case of no actions.
             CollectRecipeActionChilds(loadedAction, actionsList);
 
             return actionsList;
@@ -79,6 +81,24 @@ namespace GuideRecipeBackend
                 actionsList.Add(actionData);
             }
         }
+
+        /* Code for Parameters
+        InputParameters = new List<ActionParameterData>(),
+        OutputParameters = new List<ActionParameterData>()
+
+        foreach (var prop in action.GetProperties())
+        {
+            if (typeof(InParameter).IsAssignableFrom(prop.PropertyType))
+            {
+                actionData.InputParameters.Add(new ActionParameterData() { Name = prop.Name, Description = prop.GetDescription(), TypeName = prop.PropertyType.GenericTypeArguments.ToString() });
+            }
+
+            if (typeof(OutParameter).IsAssignableFrom(prop.PropertyType))
+            {
+                actionData.OutputParameters.Add(new ActionParameterData() { Name = prop.Name });
+            }
+        }
+         */
 
 
         private object onGetActionTypes(dynamic arg)
@@ -111,6 +131,27 @@ namespace GuideRecipeBackend
             return result;
         }
 
+        private object onGetActionParameters(dynamic arg)
+        {
+            var success = Guid.TryParse((string)arg.actionId, out Guid actionId);
+            var man = ServiceManager.GetService<GuideManager>();
+            var selectedAction = man.LoadAction(actionId);
+            ActionData actionData = new ActionData();
+            foreach (var prop in selectedAction.GetProperties())
+            {
+                if (typeof(InParameter).IsAssignableFrom(prop.PropertyType))
+                {
+                    actionData.InputParameters.Add(new ActionParameterData() { Name = prop.Name });
+                }
+
+                if (typeof(OutParameter).IsAssignableFrom(prop.PropertyType))
+                {
+                    actionData.OutputParameters.Add(new ActionParameterData() { Name = prop.Name });
+                }
+            }
+            return actionData;
+        }
+
         private class ActionTypeData
         {
             public string AssemblyBaseName { get; set; }
@@ -118,7 +159,6 @@ namespace GuideRecipeBackend
             public string Description { get; set; }
             public string Name { get; set; }
             public object TypeName { get; set; }
-
         }
 
         private class ActionData
