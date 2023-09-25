@@ -50,7 +50,7 @@ namespace GuideRecipeBackend.AuditTrail
             var action = man.LoadAction(Guid.Parse(objectId));
 
             var result = action.GetType().GetProperty(changedPropertyName).GetValue(action);
-            action.GetType().GetProperty(changedPropertyName).SetValue(action, changedPropertyValue, null);
+            action.GetType().GetProperty(changedPropertyName).SetValue(action, changedPropertyValue?.ToString(), null);
             man.SaveAction(action, "Inline editing");
             return result;
         }
