@@ -1,7 +1,9 @@
 ﻿using GO;
 using GO.Guide;
 using GO.Guide.Actions;
+using GO.Guide.DataLayer;
 using GO.Mes.AuditTrail;
+using Newtonsoft.Json;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -12,31 +14,46 @@ using System.Threading.Tasks;
 namespace GuideRecipeBackend.AuditTrail
 {
     [
-        ValueContainerObjectType(new[] { 
-            typeof(NativeAction), 
-            typeof(Recipe) 
+        ValueContainerObjectType(new[] {
+            typeof(NativeAction),
+            typeof(Recipe)
         })
     ]
     public class GuideDataPersister : IObjectPersister
     {
 
         // We expect the auxData to contain information on the specific type of action
-        public object CreateObject(Type objectType, string parentObjectId, string auxData)
+        public object CreateObject(Type objectType, string parentObjectIdPath, string auxData)
         {
             if (objectType == typeof(NativeAction))
             {
                 return "{ name: \"new\" }";
             }
-            if(objectType == typeof(Recipe))
+            if (objectType == typeof(Recipe))
             {
-                return "{ actions: [], name: \"new\" }";
+                var success = Guid.TryParse((string)parentObjectIdPath, out Guid actionId);
+                var man = GO.AppManager.Current.ServiceManager.GetService<GuideManager>();
+
+                var data = new SequenceAction()
+                {
+                    ActionId = actionId,
+                    Name = "new",
+                };
+
+                man.SaveAction(data, "create object");
+                var action = man.LoadAction(data.ActionId);
+                return action;
+                //return "{ actions: [], name: \"new\" }";
             }
+
             return null;
         }
 
         public void DeleteValueContainer(Type objectType, string objectId)
         {
-            throw new NotImplementedException();
+            var man = GO.AppManager.Current.ServiceManager.GetService<GuideManager>();
+            var success = Guid.TryParse((string)objectId, out Guid actionId);
+            man.DeleteAction(actionId);
         }
 
         public object GetObjectId(Type objectType, object data)
@@ -44,10 +61,10 @@ namespace GuideRecipeBackend.AuditTrail
             return -1;
         }
 
-        public object UpdateValueContainer(Type objectType, string objectId, string changedPropertyName, object changedPropertyValue)
+        public object UpdateValueContainer(Type objectType, string objectIdPath, string changedPropertyName, object changedPropertyValue)
         {
             var man = GO.AppManager.Current.ServiceManager.GetService<GuideManager>();
-            var action = man.LoadAction(Guid.Parse(objectId));
+            var action = man.LoadAction(Guid.Parse(objectIdPath));
 
             var result = action.GetType().GetProperty(changedPropertyName).GetValue(action);
             action.GetType().GetProperty(changedPropertyName).SetValue(action, changedPropertyValue?.ToString(), null);

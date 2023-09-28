@@ -25,7 +25,6 @@ namespace GuideRecipeBackend
             FuncSet.Add("getAllRecipes", onGetAllRecipes);
             FuncSet.Add("getActionTypes", onGetActionTypes);
             FuncSet.Add("getRecipeActions", onGetRecipeActions);
-            FuncSet.Add("getActionParameters", onGetActionParameters);
         }
 
         [HttpPost]
@@ -68,6 +67,7 @@ namespace GuideRecipeBackend
             {
                 var actionData = new ActionData
                 {
+                    actionId = action.ActionId.ToString(),
                     AssemblyBaseName = action.GetInfo().AssemblyBaseName,
                     Name = action.GetInfo().Name,
                     TypeName = action.GetInfo().TypeFullName,
@@ -131,25 +131,15 @@ namespace GuideRecipeBackend
             return result;
         }
 
-        private object onGetActionParameters(dynamic arg)
+        private class ActionData
         {
-            var success = Guid.TryParse((string)arg.actionId, out Guid actionId);
-            var man = ServiceManager.GetService<GuideManager>();
-            var selectedAction = man.LoadAction(actionId);
-            ActionData actionData = new ActionData();
-            foreach (var prop in selectedAction.GetProperties())
-            {
-                if (typeof(InParameter).IsAssignableFrom(prop.PropertyType))
-                {
-                    actionData.InputParameters.Add(new ActionParameterData() { Name = prop.Name });
-                }
-
-                if (typeof(OutParameter).IsAssignableFrom(prop.PropertyType))
-                {
-                    actionData.OutputParameters.Add(new ActionParameterData() { Name = prop.Name });
-                }
-            }
-            return actionData;
+            public string actionId { get; set; }
+            public string AssemblyBaseName { get; set; }
+            public string Name { get; set; }
+            public string TypeName { get; set; }
+            public List<ActionParameterData> InputParameters { get; set; } = new List<ActionParameterData>();
+            public List<ActionParameterData> OutputParameters { get; set; } = new List<ActionParameterData>();
+            public List<ActionData> Actions { get; set; } = new List<ActionData>();
         }
 
         private class ActionTypeData
@@ -161,15 +151,6 @@ namespace GuideRecipeBackend
             public object TypeName { get; set; }
         }
 
-        private class ActionData
-        {
-            public string AssemblyBaseName { get; set; }
-            public string Name { get; set; }
-            public string TypeName { get; set; }
-            public List<ActionParameterData> InputParameters { get; set; } = new List<ActionParameterData>();
-            public List<ActionParameterData> OutputParameters { get; set; } = new List<ActionParameterData>();
-            public List<ActionData> Actions { get; set; } = new List<ActionData>();
-        }
 
         private class ActionParameterData
         {
