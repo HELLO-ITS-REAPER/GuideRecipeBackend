@@ -3,6 +3,7 @@ using GO.Guide;
 using GO.Guide.Actions;
 using GO.Guide.DataLayer;
 using GO.Mes.AuditTrail;
+using GO.Windows.Extension;
 using Newtonsoft.Json;
 using System;
 using System.CodeDom;
@@ -38,12 +39,12 @@ namespace GuideRecipeBackend.AuditTrail
                 {
                     ActionId = actionId,
                     Name = "new",
+                    Actions = { new StepAction() { ActionId = Guid.NewGuid() } }
                 };
 
                 man.SaveAction(data, "create object");
                 var action = man.LoadAction(data.ActionId);
                 return action;
-                //return "{ actions: [], name: \"new\" }";
             }
 
             return null;
