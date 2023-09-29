@@ -73,6 +73,18 @@ namespace GuideRecipeBackend
                     TypeName = action.GetInfo().TypeFullName,
                 };
 
+                foreach (var prop in action.GetProperties())
+                {
+                    if (typeof(InParameter).IsAssignableFrom(prop.PropertyType))
+                    {
+                        actionData.InputParameters.Add(new ActionParameterData() { Name = prop.Name, Description = prop.GetDescription(), TypeName = prop.PropertyType.GenericTypeArguments.ToString(), Value = action.GetInfo().Properties[0].Value });
+                    }
+
+                    if (typeof(OutParameter).IsAssignableFrom(prop.PropertyType))
+                    {
+                        actionData.OutputParameters.Add(new ActionParameterData() { Name = prop.Name, Description = prop.GetDescription(), TypeName = prop.PropertyType.GenericTypeArguments.ToString(), Value = action.GetInfo().Properties[0].Value });
+                    }
+                }
                 if (action is ICompositeAction nestedCompositeAction)
                 {
                     CollectRecipeActionChilds(nestedCompositeAction, actionData.Actions);
@@ -82,23 +94,7 @@ namespace GuideRecipeBackend
             }
         }
 
-        /* Code for Parameters
-        InputParameters = new List<ActionParameterData>(),
-        OutputParameters = new List<ActionParameterData>()
 
-        foreach (var prop in action.GetProperties())
-        {
-            if (typeof(InParameter).IsAssignableFrom(prop.PropertyType))
-            {
-                actionData.InputParameters.Add(new ActionParameterData() { Name = prop.Name, Description = prop.GetDescription(), TypeName = prop.PropertyType.GenericTypeArguments.ToString() });
-            }
-
-            if (typeof(OutParameter).IsAssignableFrom(prop.PropertyType))
-            {
-                actionData.OutputParameters.Add(new ActionParameterData() { Name = prop.Name });
-            }
-        }
-         */
 
 
         private object onGetActionTypes(dynamic arg)
@@ -113,19 +109,6 @@ namespace GuideRecipeBackend
 
                 data.Description = ((ActionDescriptionAttribute)type.GetCustomAttributes(typeof(ActionDescriptionAttribute), false).FirstOrDefault())?.Description;
                 data.Category = ((CategoryAttribute)type.GetCustomAttributes(typeof(CategoryAttribute), false).FirstOrDefault())?.Category;
-                //foreach(var prop in type.GetProperties())
-                //{
-                //    if (typeof(InParameter).IsAssignableFrom(prop.PropertyType))
-                //    {
-                //        data.InputParameters.Add(new ActionParameterData() { Name = prop.Name });
-                //    }
-
-                //    if (typeof(OutParameter).IsAssignableFrom(prop.PropertyType))
-                //    {
-                //        data.OutputParameters.Add(new ActionParameterData() { Name = prop.Name });
-                //    }
-                //}
-
                 result.Add(data);
             }
             return result;
