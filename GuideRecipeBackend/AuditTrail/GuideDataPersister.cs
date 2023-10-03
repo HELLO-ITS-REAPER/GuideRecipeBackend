@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 
 namespace GuideRecipeBackend.AuditTrail
 {
@@ -38,8 +39,8 @@ namespace GuideRecipeBackend.AuditTrail
                 var data = new SequenceAction()
                 {
                     ActionId = actionId,
-                    Name = "new",
-                    Actions = { new StepAction() { ActionId = Guid.NewGuid() } }
+                    Name = "Guide2:NewRecipe",
+                    Actions = { new StepAction() { Name = "StepAction", ActionId = Guid.NewGuid(), Action = new AndAction() } }
                 };
 
                 man.SaveAction(data, "create object");

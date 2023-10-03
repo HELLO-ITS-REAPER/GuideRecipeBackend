@@ -95,8 +95,6 @@ namespace GuideRecipeBackend
         }
 
 
-
-
         private object onGetActionTypes(dynamic arg)
         {
             var man = ServiceManager.GetService<GuideManager>();
