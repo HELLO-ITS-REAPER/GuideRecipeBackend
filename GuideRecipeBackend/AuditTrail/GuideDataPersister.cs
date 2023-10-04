@@ -1,6 +1,7 @@
 ﻿using GO;
 using GO.Guide;
 using GO.Guide.Actions;
+using GO.Guide.Actions.Serialization;
 using GO.Guide.DataLayer;
 using GO.Mes.AuditTrail;
 using GO.Windows.Extension;
@@ -11,7 +12,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.UI.WebControls;
 
 namespace GuideRecipeBackend.AuditTrail
 {
@@ -54,8 +54,17 @@ namespace GuideRecipeBackend.AuditTrail
         public void DeleteValueContainer(Type objectType, string objectId)
         {
             var man = GO.AppManager.Current.ServiceManager.GetService<GuideManager>();
-            var success = Guid.TryParse((string)objectId, out Guid actionId);
-            man.DeleteAction(actionId);
+            if (objectType == typeof(Recipe))
+            {
+                var success = Guid.TryParse((string)objectId, out Guid actionId);
+                man.DeleteAction(actionId);
+            }
+            else if (objectType == typeof(NativeAction))
+            {
+                string actionId = objectId.Split(',').First();
+                var recipe = man.LoadAction(Guid.Parse(actionId));
+                man.SaveAction(recipe, "Inline editing");
+            }
         }
 
         public object GetObjectId(Type objectType, object data)
@@ -63,11 +72,10 @@ namespace GuideRecipeBackend.AuditTrail
             return -1;
         }
 
-        public object UpdateValueContainer(Type objectType, string objectIdPath, string changedPropertyName, object changedPropertyValue)
+        public object UpdateValueContainer(Type objectType, string objectId, string changedPropertyName, object changedPropertyValue)
         {
             var man = GO.AppManager.Current.ServiceManager.GetService<GuideManager>();
-            var action = man.LoadAction(Guid.Parse(objectIdPath));
-
+            var action = man.LoadAction(Guid.Parse(objectId));
             var result = action.GetType().GetProperty(changedPropertyName).GetValue(action);
             action.GetType().GetProperty(changedPropertyName).SetValue(action, changedPropertyValue?.ToString(), null);
             man.SaveAction(action, "Inline editing");
