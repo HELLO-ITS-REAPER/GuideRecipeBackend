@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Filters;
+using GuideRecipeBackend.Models;
 
 namespace GuideRecipeBackend
 {
@@ -53,7 +54,7 @@ namespace GuideRecipeBackend
             var success = Guid.TryParse((string)arg.actionId, out Guid actionId);
 
             var loadedAction = (ICompositeAction)man.LoadAction(actionId);
-            List<ActionData> actionsList = new List<ActionData>();
+            List<Models.ActionData> actionsList = new List<Models.ActionData>();
 
             // Remember to make safety in case of no actions.
             CollectRecipeActionChilds(loadedAction, actionsList);
@@ -61,11 +62,11 @@ namespace GuideRecipeBackend
             return actionsList;
         }
 
-        private void CollectRecipeActionChilds(ICompositeAction compositeAction, List<ActionData> actionsList)
+        private void CollectRecipeActionChilds(ICompositeAction compositeAction, List<Models.ActionData> actionsList)
         {
             foreach (var action in compositeAction.Actions)
             {
-                var actionData = new ActionData
+                var actionData = new Models.ActionData
                 {
                     actionId = action.ActionId.ToString(),
                     AssemblyBaseName = action.GetInfo().AssemblyBaseName,
@@ -77,12 +78,12 @@ namespace GuideRecipeBackend
                 {
                     if (typeof(InParameter).IsAssignableFrom(prop.PropertyType))
                     {
-                        actionData.InputParameters.Add(new ActionParameterData() { Name = prop.Name, Description = prop.GetDescription(), TypeName = prop.PropertyType.GenericTypeArguments.ToString(), Value = null });
+                        actionData.InputParameters.Add(new ActionParameterData() { Name = prop.Name, Description = prop.GetDescription(), TypeName = action.GetInfo().Properties?[0].Value.GetType().Name, Value = action.GetInfo().Properties?[0].Value });
                     }
 
                     if (typeof(OutParameter).IsAssignableFrom(prop.PropertyType))
                     {
-                        actionData.OutputParameters.Add(new ActionParameterData() { Name = prop.Name, Description = prop.GetDescription(), TypeName = prop.PropertyType.GenericTypeArguments.ToString(), Value = null  });
+                        actionData.OutputParameters.Add(new ActionParameterData() { Name = prop.Name, Description = prop.GetDescription(), TypeName = prop.PropertyType.GenericTypeArguments.ToString(), Value = null });
                     }
                 }
                 if (action is ICompositeAction nestedCompositeAction)
@@ -112,33 +113,8 @@ namespace GuideRecipeBackend
             return result;
         }
 
-        private class ActionData
-        {
-            public string actionId { get; set; }
-            public string AssemblyBaseName { get; set; }
-            public string Name { get; set; }
-            public string TypeName { get; set; }
-            public List<ActionParameterData> InputParameters { get; set; } = new List<ActionParameterData>();
-            public List<ActionParameterData> OutputParameters { get; set; } = new List<ActionParameterData>();
-            public List<ActionData> Actions { get; set; } = new List<ActionData>();
-        }
+        
 
-        private class ActionTypeData
-        {
-            public string AssemblyBaseName { get; set; }
-            public string Category { get; set; }
-            public string Description { get; set; }
-            public string Name { get; set; }
-            public object TypeName { get; set; }
-        }
-
-
-        private class ActionParameterData
-        {
-            public string Name { get; set; }
-            public string Description { get; set; }
-            public string TypeName { get; set; }
-            public object Value { get; set; }
-        }
+        
     }
 }

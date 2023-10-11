@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GuideRecipeBackend.Models;
 
 namespace GuideRecipeBackend.AuditTrail
 {
@@ -62,8 +63,36 @@ namespace GuideRecipeBackend.AuditTrail
             else if (objectType == typeof(NativeAction))
             {
                 string actionId = objectId.Split(',').First();
-                var recipe = man.LoadAction(Guid.Parse(actionId));
-                man.SaveAction(recipe, "Inline editing");
+                var recipe = (ICompositeAction)man.LoadAction(Guid.Parse(actionId));
+                List<Models.ActionData> actionData = new List<Models.ActionData>();
+                RebuildRecipeActions(recipe, actionData, objectId);
+                var result = recipe.GetType().GetProperty("Actions").GetValue(recipe);
+                //man.SaveAction(actionData, "Inline editing");
+
+            }
+        }
+
+        private void RebuildRecipeActions(ICompositeAction compositeAction, List<Models.ActionData> actionData, string excludedActionId)
+        {
+            foreach (var action in compositeAction.Actions)
+            {
+                if (action.ActionId.ToString() == excludedActionId.Split(',').Last())
+                {
+                    continue;
+                }
+                var data = new Models.ActionData
+                {
+                    actionId = action.ActionId.ToString(),
+                    Name = action.Name,
+                    TypeName = action.GetInfo().TypeFullName,
+                    AssemblyBaseName = action.GetInfo().AssemblyBaseName,
+                };
+
+                if (action is ICompositeAction nestedCompositeAction)
+                {
+                    RebuildRecipeActions(nestedCompositeAction, data.Actions, excludedActionId);
+                }
+                actionData.Add(data);
             }
         }
 
