@@ -78,12 +78,12 @@ namespace GuideRecipeBackend
                 {
                     if (typeof(InParameter).IsAssignableFrom(prop.PropertyType))
                     {
-                        actionData.InputParameters.Add(new ActionParameterData() { Name = prop.Name, Description = prop.GetDescription(), TypeName = action.GetInfo().Properties?[0].Value.GetType().Name, Value = action.GetInfo().Properties?[0].Value });
+                        actionData.InputParameters.Add(new ActionParameterData() { Name = prop.Name, Description = prop.GetDescription(), TypeName = action.GetInfo().Properties?[0].Value.GetType().Name, ParameterValue = action.GetInfo().Properties?[0].Value.ToString() });
                     }
 
                     if (typeof(OutParameter).IsAssignableFrom(prop.PropertyType))
                     {
-                        actionData.OutputParameters.Add(new ActionParameterData() { Name = prop.Name, Description = prop.GetDescription(), TypeName = prop.PropertyType.GenericTypeArguments.ToString(), Value = null });
+                        actionData.OutputParameters.Add(new ActionParameterData() { Name = prop.Name, Description = prop.GetDescription(), TypeName = prop.PropertyType.GenericTypeArguments.ToString(), ParameterValue = null });
                     }
                 }
                 if (action is ICompositeAction nestedCompositeAction)
