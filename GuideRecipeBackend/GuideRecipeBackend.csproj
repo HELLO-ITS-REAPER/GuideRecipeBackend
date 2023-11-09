@@ -99,6 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuditTrail\GuideDataPersister.cs" />
+    <Compile Include="WorkcenterModels\Workcenter.cs" />
     <Compile Include="WorkcentersController.cs" />
     <Compile Include="GuideRecipeController.cs" />
     <Compile Include="Models\ActionData.cs" />
@@ -134,9 +135,7 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="WorkcenterModels\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>powershell.exe -File "$(SolutionDir)scripts\buildScript_Stop.ps1"

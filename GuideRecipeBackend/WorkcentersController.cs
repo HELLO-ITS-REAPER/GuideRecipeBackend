@@ -18,6 +18,8 @@ using System.Web.Http.Filters;
 using GuideRecipeBackend.Models;
 using GO.Global.Workcenters;
 using GO.Global.Workcenters.WorkcenterTypes;
+using GO.Oms.Shared.Workcenter;
+using GuideRecipeBackend.WorkcenterModels;
 
 namespace GuideRecipeBackend
 {
@@ -42,10 +44,55 @@ namespace GuideRecipeBackend
             }
         }
 
-        private object onGetAllWorkcenters(dynamic arg)
+        private List<WorkcenterModels.Workcenter> onGetAllWorkcenters(dynamic arg)
         {
-            var man = ServiceManager.GetService<WorkcenterManager>();
-            return man.GetWorkcenters();
+            var man = ServiceManager.GetService<GO.Global.Workcenters.WorkcenterManager>();
+            var allWorkcenters = man.GetWorkcenters();
+            List<WorkcenterModels.Workcenter> workcentersList = new List<WorkcenterModels.Workcenter>();
+
+            foreach (var workcenter in allWorkcenters)
+            {
+                var convertedWorkcenter = new WorkcenterModels.Workcenter
+                {
+                    WorkcenterId = workcenter.WorkcenterId.ToString(),
+                    ParentWorkcenterId = workcenter.ParentWorkcenterId.ToString(),
+                    Created = workcenter.Created.ToString(),
+                    Description = workcenter.Description,
+                    Enabled = workcenter.Enabled,
+                    Modified = workcenter.Modified.ToString(),
+                    Release = workcenter.Release,
+                    Schedule = workcenter.Schedule,
+                    WorkcenterName = workcenter.WorkcenterName,
+                    WorkcenterControllerType = workcenter.WorkcenterControllerType,
+                    Children = new List<WorkcenterModels.Workcenter>() // Initialize Children
+                };
+                workcentersList.Add(convertedWorkcenter);
+            }
+
+            List<WorkcenterModels.Workcenter> organizedWorkcenters = new List<WorkcenterModels.Workcenter>();
+
+            // Define a function to recursively build the hierarchy
+            void BuildHierarchy(WorkcenterModels.Workcenter parent)
+            {
+                var children = workcentersList.Where(w => w.ParentWorkcenterId == parent.WorkcenterId).ToList();
+                foreach (var child in children)
+                {
+                    parent.Children.Add(child);
+                    BuildHierarchy(child);
+                }
+            }
+
+            // Find root workcenters (those without parents)
+            var rootWorkcenters = workcentersList.Where(w => string.IsNullOrEmpty(w.ParentWorkcenterId)).ToList();
+
+            // Build hierarchy starting from root workcenters
+            foreach (var root in rootWorkcenters)
+            {
+                organizedWorkcenters.Add(root);
+                BuildHierarchy(root);
+            }
+
+            return organizedWorkcenters;
         }
     }
 }
