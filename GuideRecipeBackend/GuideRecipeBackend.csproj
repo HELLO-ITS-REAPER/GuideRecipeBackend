@@ -98,6 +98,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuditTrail\WorkcenterDataPersister.cs" />
     <Compile Include="AuditTrail\GuideDataPersister.cs" />
     <Compile Include="WorkcenterModels\Workcenter.cs" />
     <Compile Include="WorkcentersController.cs" />
