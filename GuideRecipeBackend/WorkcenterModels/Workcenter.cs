@@ -1,6 +1,7 @@
 ﻿using GO.Global.Workcenters;
 using GO.Global.Workcenters.WorkcenterTypes;
 using GO.Oms.Shared.Workcenter;
+using GO.WcsManager;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,13 @@ namespace GuideRecipeBackend.WorkcenterModels
         public string WorkcenterName { get; set; }
         public string WorkcenterType { get; set; }
         public string WorkcenterControllerType { get; set; }
-        public string Location { get; set; }
+        public Locations Location { get; set; }
         public List<Workcenter> Children { get; set; } = new List<Workcenter>();
+    }
+
+    public class Locations
+    {
+        public string LocationKey { get; set; }
+        public string LocationType { get; set; }
     }
 }

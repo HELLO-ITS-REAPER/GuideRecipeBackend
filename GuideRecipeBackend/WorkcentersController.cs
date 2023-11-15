@@ -22,6 +22,7 @@ using GO.Oms.Shared.Workcenter;
 using GuideRecipeBackend.WorkcenterModels;
 using GO.Global.Workcenters.Extension;
 using GO.Data;
+using GO.WcsManager;
 
 namespace GuideRecipeBackend
 {
@@ -30,6 +31,7 @@ namespace GuideRecipeBackend
         public WorkcentersController()
         {
             FuncSet.Add("getAllWorkcenters", onGetAllWorkcenters);
+            FuncSet.Add("getAllLocations", onGetAllLocations);
             FuncSet.Add("createWorkcenter", onCreateWorkcenter);
             FuncSet.Add("deleteWorkcenter", onDeleteWorkcenter);
             FuncSet.Add("updateWorkcenterProperty", onUpdateWorkcenterProperty);
@@ -71,7 +73,11 @@ namespace GuideRecipeBackend
                     WorkcenterName = workcenter.WorkcenterName,
                     WorkcenterType = workcenter.WorkcenterType,
                     WorkcenterControllerType = workcenter.WorkcenterControllerType,
-                    Location = workcenter.LocationType,
+                    Location = new Locations
+                    {
+                        LocationKey = workcenter.LocationKey,
+                        LocationType = workcenter.LocationType
+                    },
                     Children = new List<WorkcenterModels.Workcenter>()
                 };
                 workcentersList.Add(convertedWorkcenter);
@@ -103,6 +109,24 @@ namespace GuideRecipeBackend
             return organizedWorkcenters;
         }
 
+        private object onGetAllLocations(dynamic arg)
+        {
+            var man = ServiceManager.GetService<ILocationManager>();
+            var locationCollection = man.GetLocations();
+            List<Locations> locationsList = new List<Locations>();
+
+            foreach (var location in locationCollection)
+            {
+                var convertedLocations = new Locations
+                {
+                    LocationKey = location.Key,
+                    LocationType = location.Type,
+                };
+                locationsList.Add(convertedLocations);
+            }
+            return locationsList;
+        }
+
         private object onCreateWorkcenter(dynamic arg)
         {
             var man = ServiceManager.GetService<GO.Global.Workcenters.WorkcenterManager>();
@@ -124,7 +148,7 @@ namespace GuideRecipeBackend
                 WorkcenterName = newWorkcenter.WorkcenterName,
                 WorkcenterType = newWorkcenter.WorkcenterType,
                 WorkcenterControllerType = newWorkcenter.WorkcenterControllerType,
-                Children = new List<WorkcenterModels.Workcenter>() // Initialize Children
+                Children = new List<WorkcenterModels.Workcenter>()
             };
             return convertedWorkcenter;
         }
@@ -145,6 +169,7 @@ namespace GuideRecipeBackend
 
         private object onUpdateWorkcenterProperty(dynamic arg)
         {
+
             var man = ServiceManager.GetService<GO.Global.Workcenters.WorkcenterManager>();
             var data = man.GetWorkcenter((string)arg.name, true);
             data.SetValue((string)arg.property, (string)arg.newValue);
@@ -162,11 +187,14 @@ namespace GuideRecipeBackend
                 WorkcenterName = data.WorkcenterName,
                 WorkcenterType = data.WorkcenterType,
                 WorkcenterControllerType = data.WorkcenterControllerType,
-                Children = new List<WorkcenterModels.Workcenter>() // Initialize Children
+                Location = new Locations
+                {
+                    LocationKey = data.LocationKey,
+                    LocationType = data.LocationType
+                },
+                Children = new List<WorkcenterModels.Workcenter>()
             };
             return convertedWorkcenter;
         }
     }
-
-    //Update workcenter prop.
 }

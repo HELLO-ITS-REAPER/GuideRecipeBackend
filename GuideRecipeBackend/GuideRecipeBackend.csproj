@@ -71,6 +71,9 @@
     <Reference Include="GO.Shared">
       <HintPath>..\bins\GO.Shared.dll</HintPath>
     </Reference>
+    <Reference Include="GO.WcsManager.Plugin">
+      <HintPath>..\bins\GO.WcsManager.Plugin.dll</HintPath>
+    </Reference>
     <Reference Include="GO.Windows">
       <HintPath>..\bins\GO.Windows.dll</HintPath>
     </Reference>
