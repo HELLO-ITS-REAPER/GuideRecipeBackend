@@ -73,11 +73,10 @@ namespace GuideRecipeBackend
                     WorkcenterName = workcenter.WorkcenterName,
                     WorkcenterType = workcenter.WorkcenterType,
                     WorkcenterControllerType = workcenter.WorkcenterControllerType,
-                    Location = new Locations
-                    {
-                        LocationKey = workcenter.LocationKey,
-                        LocationType = workcenter.LocationType
-                    },
+
+                    LocationKey = workcenter.LocationKey,
+                    LocationType = workcenter.LocationType,
+
                     Children = new List<WorkcenterModels.Workcenter>()
                 };
                 workcentersList.Add(convertedWorkcenter);
@@ -187,11 +186,8 @@ namespace GuideRecipeBackend
                 WorkcenterName = data.WorkcenterName,
                 WorkcenterType = data.WorkcenterType,
                 WorkcenterControllerType = data.WorkcenterControllerType,
-                Location = new Locations
-                {
-                    LocationKey = data.LocationKey,
-                    LocationType = data.LocationType
-                },
+                LocationKey = data.LocationKey,
+                LocationType = data.LocationType,
                 Children = new List<WorkcenterModels.Workcenter>()
             };
             return convertedWorkcenter;
