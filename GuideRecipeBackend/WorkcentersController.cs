@@ -73,10 +73,8 @@ namespace GuideRecipeBackend
                     WorkcenterName = workcenter.WorkcenterName,
                     WorkcenterType = workcenter.WorkcenterType,
                     WorkcenterControllerType = workcenter.WorkcenterControllerType,
-
                     LocationKey = workcenter.LocationKey,
                     LocationType = workcenter.LocationType,
-
                     Children = new List<WorkcenterModels.Workcenter>()
                 };
                 workcentersList.Add(convertedWorkcenter);
@@ -137,17 +135,8 @@ namespace GuideRecipeBackend
             var convertedWorkcenter = new WorkcenterModels.Workcenter
             {
                 WorkcenterId = newWorkcenter.WorkcenterId.ToString(),
-                ParentWorkcenterId = newWorkcenter.ParentWorkcenterId.ToString(),
-                Created = newWorkcenter.Created.ToString(),
-                Description = newWorkcenter.Description,
-                Enabled = newWorkcenter.Enabled,
-                Modified = newWorkcenter.Modified.ToString(),
-                Release = newWorkcenter.Release,
-                Schedule = newWorkcenter.Schedule,
                 WorkcenterName = newWorkcenter.WorkcenterName,
-                WorkcenterType = newWorkcenter.WorkcenterType,
-                WorkcenterControllerType = newWorkcenter.WorkcenterControllerType,
-                Children = new List<WorkcenterModels.Workcenter>()
+                Created = newWorkcenter.Created.ToString(),
             };
             return convertedWorkcenter;
         }
