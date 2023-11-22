@@ -19,10 +19,12 @@ using GuideRecipeBackend.Models;
 using GO.Global.Workcenters;
 using GO.Global.Workcenters.WorkcenterTypes;
 using GO.Oms.Shared.Workcenter;
-using GuideRecipeBackend.WorkcenterModels;
 using GO.Global.Workcenters.Extension;
 using GO.Data;
 using GO.WcsManager;
+using GO.Oms.Shared.DataLayer;
+using GO.Oms.Shared.Workcenter.Extension;
+using GO.Extension;
 
 namespace GuideRecipeBackend
 {
@@ -32,10 +34,10 @@ namespace GuideRecipeBackend
         {
             FuncSet.Add("getAllWorkcenters", onGetAllWorkcenters);
             FuncSet.Add("getAllLocations", onGetAllLocations);
+            FuncSet.Add("getAllWorkcenterTypes", onGetAllWorkcenterTypes);
             FuncSet.Add("createWorkcenter", onCreateWorkcenter);
             FuncSet.Add("deleteWorkcenter", onDeleteWorkcenter);
             FuncSet.Add("updateWorkcenterProperty", onUpdateWorkcenterProperty);
-            FuncSet.Add("cleanData", onCleanData);
         }
 
         [HttpPost]
@@ -52,76 +54,28 @@ namespace GuideRecipeBackend
             }
         }
 
-        private List<WorkcenterModels.Workcenter> onGetAllWorkcenters(dynamic arg)
+        private object onGetAllWorkcenters(dynamic arg)
         {
             var man = ServiceManager.GetService<GO.Global.Workcenters.WorkcenterManager>();
-            var allWorkcenters = man.GetWorkcenters();
-            List<WorkcenterModels.Workcenter> workcentersList = new List<WorkcenterModels.Workcenter>();
+            return man.GetWorkcenters();
+        }
 
-            foreach (var workcenter in allWorkcenters)
+        private object onGetAllWorkcenterTypes(dynamic arg)
+        {
+            return new List<string>
             {
-                var convertedWorkcenter = new WorkcenterModels.Workcenter
-                {
-                    WorkcenterId = workcenter.WorkcenterId.ToString(),
-                    ParentWorkcenterId = workcenter.ParentWorkcenterId.ToString(),
-                    Created = workcenter.Created.ToString(),
-                    Description = workcenter.Description,
-                    Enabled = workcenter.Enabled,
-                    Modified = workcenter.Modified.ToString(),
-                    Release = workcenter.Release,
-                    Schedule = workcenter.Schedule,
-                    WorkcenterName = workcenter.WorkcenterName,
-                    WorkcenterType = workcenter.WorkcenterType,
-                    WorkcenterControllerType = workcenter.WorkcenterControllerType,
-                    LocationKey = workcenter.LocationKey,
-                    LocationType = workcenter.LocationType,
-                    Children = new List<WorkcenterModels.Workcenter>()
-                };
-                workcentersList.Add(convertedWorkcenter);
-            }
-
-            List<WorkcenterModels.Workcenter> organizedWorkcenters = new List<WorkcenterModels.Workcenter>();
-
-            // Define a function to recursively build the hierarchy
-            void HierarchyBuilder(WorkcenterModels.Workcenter parent)
-            {
-                var children = workcentersList.Where(w => w.ParentWorkcenterId == parent.WorkcenterId).ToList();
-                foreach (var child in children)
-                {
-                    parent.Children.Add(child);
-                    HierarchyBuilder(child);
-                }
-            }
-
-            // Find root workcenters (those without parents)
-            var rootWorkcenters = workcentersList.Where(w => string.IsNullOrEmpty(w.ParentWorkcenterId)).ToList();
-
-            // Build hierarchy starting from root workcenters
-            foreach (var root in rootWorkcenters)
-            {
-                organizedWorkcenters.Add(root);
-                HierarchyBuilder(root);
-            }
-
-            return organizedWorkcenters;
+                GO.ProductionAssets.Datalayer.WorkcenterTypes.Enterprise,
+                GO.ProductionAssets.Datalayer.WorkcenterTypes.Site,
+                GO.ProductionAssets.Datalayer.WorkcenterTypes.Area,
+                GO.ProductionAssets.Datalayer.WorkcenterTypes.Workcenter,
+                GO.ProductionAssets.Datalayer.WorkcenterTypes.Workcell
+            };
         }
 
         private object onGetAllLocations(dynamic arg)
         {
             var man = ServiceManager.GetService<ILocationManager>();
-            var locationCollection = man.GetLocations();
-            List<Locations> locationsList = new List<Locations>();
-
-            foreach (var location in locationCollection)
-            {
-                var convertedLocations = new Locations
-                {
-                    LocationKey = location.Key,
-                    LocationType = location.Type,
-                };
-                locationsList.Add(convertedLocations);
-            }
-            return locationsList;
+            return man.GetLocations();
         }
 
         private object onCreateWorkcenter(dynamic arg)
@@ -132,13 +86,7 @@ namespace GuideRecipeBackend
             newWorkcenter.WorkcenterName = (string)arg.workcenterName;
             newWorkcenter.Created = DateTime.Now;
             man.WriteWorkcenter(newWorkcenter);
-            var convertedWorkcenter = new WorkcenterModels.Workcenter
-            {
-                WorkcenterId = newWorkcenter.WorkcenterId.ToString(),
-                WorkcenterName = newWorkcenter.WorkcenterName,
-                Created = newWorkcenter.Created.ToString(),
-            };
-            return convertedWorkcenter;
+            return newWorkcenter;
         }
 
         private object onDeleteWorkcenter(dynamic arg)
@@ -149,37 +97,13 @@ namespace GuideRecipeBackend
             return getWorkcenter;
         }
 
-        private object onCleanData(dynamic arg)
-        {
-            var man = ServiceManager.GetService<GO.Global.Workcenters.WorkcenterManager>();
-            return man.GetWorkcenters();
-        }
-
         private object onUpdateWorkcenterProperty(dynamic arg)
         {
-
             var man = ServiceManager.GetService<GO.Global.Workcenters.WorkcenterManager>();
             var data = man.GetWorkcenter((string)arg.name, true);
             data.SetValue((string)arg.property, (string)arg.newValue);
             man.WriteWorkcenter(data);
-            var convertedWorkcenter = new WorkcenterModels.Workcenter
-            {
-                WorkcenterId = data.WorkcenterId.ToString(),
-                ParentWorkcenterId = data.ParentWorkcenterId.ToString(),
-                Created = data.Created.ToString(),
-                Description = data.Description,
-                Enabled = data.Enabled,
-                Modified = data.Modified.ToString(),
-                Release = data.Release,
-                Schedule = data.Schedule,
-                WorkcenterName = data.WorkcenterName,
-                WorkcenterType = data.WorkcenterType,
-                WorkcenterControllerType = data.WorkcenterControllerType,
-                LocationKey = data.LocationKey,
-                LocationType = data.LocationType,
-                Children = new List<WorkcenterModels.Workcenter>()
-            };
-            return convertedWorkcenter;
+            return data;
         }
     }
 }

@@ -68,6 +68,9 @@
     <Reference Include="GO.Owin2.Plugin">
       <HintPath>..\bins\GO.Owin2.Plugin.dll</HintPath>
     </Reference>
+    <Reference Include="GO.ProductionAssets.Plugin">
+      <HintPath>..\bins\GO.ProductionAssets.Plugin.dll</HintPath>
+    </Reference>
     <Reference Include="GO.Shared">
       <HintPath>..\bins\GO.Shared.dll</HintPath>
     </Reference>
@@ -103,7 +106,6 @@
   <ItemGroup>
     <Compile Include="AuditTrail\WorkcenterDataPersister.cs" />
     <Compile Include="AuditTrail\GuideDataPersister.cs" />
-    <Compile Include="WorkcenterModels\Workcenter.cs" />
     <Compile Include="WorkcentersController.cs" />
     <Compile Include="GuideRecipeController.cs" />
     <Compile Include="Models\ActionData.cs" />
