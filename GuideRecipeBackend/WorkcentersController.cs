@@ -25,6 +25,11 @@ using GO.WcsManager;
 using GO.Oms.Shared.DataLayer;
 using GO.Oms.Shared.Workcenter.Extension;
 using GO.Extension;
+using GO.Mes.Web;
+using GO.Mes.AuditTrail;
+using GO.Global.AuditTrail;
+using GuideRecipeBackend.AuditTrail;
+using System.Activities.Validation;
 
 namespace GuideRecipeBackend
 {
@@ -80,21 +85,17 @@ namespace GuideRecipeBackend
 
         private object onCreateWorkcenter(dynamic arg)
         {
-            var man = ServiceManager.GetService<GO.Global.Workcenters.WorkcenterManager>();
-            var newWorkcenter = man.CreateWorkcenter();
-            newWorkcenter.WorkcenterId = Guid.NewGuid();
-            newWorkcenter.WorkcenterName = (string)arg.workcenterName;
-            newWorkcenter.Created = DateTime.Now;
-            man.WriteWorkcenter(newWorkcenter);
-            return newWorkcenter;
+            var persister = ServiceManager.GetService<ValueContainerPersisterService>();
+            var workcenter = persister.CreateValueContainer(typeof(GO.Global.Workcenters.Workcenter), "userId", remark:"Create new workcenter", (string)arg.workcenterName, auxData:"Creating a new Workcenter");
+
+            return workcenter;
         }
 
         private object onDeleteWorkcenter(dynamic arg)
         {
-            var man = ServiceManager.GetService<GO.Global.Workcenters.WorkcenterManager>();
-            var getWorkcenter = man.GetWorkcenter((string)arg.name, true);
-            man.DeleteWorkcenter(getWorkcenter);
-            return getWorkcenter;
+            var test = ServiceManager.GetService<ValueContainerPersisterService>();
+            test.DeleteValueContainer(typeof(GO.Global.Workcenters.Workcenter), (string)arg.name, "userId", "Deleting a Workcenter");
+            return test;
         }
 
         private object onUpdateWorkcenterProperty(dynamic arg)
