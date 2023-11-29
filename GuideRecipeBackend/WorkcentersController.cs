@@ -86,25 +86,24 @@ namespace GuideRecipeBackend
         private object onCreateWorkcenter(dynamic arg)
         {
             var persister = ServiceManager.GetService<ValueContainerPersisterService>();
-            var workcenter = persister.CreateValueContainer(typeof(GO.Global.Workcenters.Workcenter), "userId", remark:"Create new workcenter", (string)arg.workcenterName, auxData:"Creating a new Workcenter");
-
+            var workcenter = persister.CreateValueContainer(typeof(GO.Global.Workcenters.Workcenter), "userId", remark:"Create new workcenter", (string)arg.name, auxData:"Creating a new Workcenter");
             return workcenter;
         }
 
         private object onDeleteWorkcenter(dynamic arg)
         {
-            var test = ServiceManager.GetService<ValueContainerPersisterService>();
-            test.DeleteValueContainer(typeof(GO.Global.Workcenters.Workcenter), (string)arg.name, "userId", "Deleting a Workcenter");
-            return test;
+            var persister = ServiceManager.GetService<ValueContainerPersisterService>();
+            persister.DeleteValueContainer(typeof(GO.Global.Workcenters.Workcenter), (string)arg.name, "userId", "Deleting a Workcenter");
+            return null;
         }
 
         private object onUpdateWorkcenterProperty(dynamic arg)
         {
             var man = ServiceManager.GetService<GO.Global.Workcenters.WorkcenterManager>();
             var data = man.GetWorkcenter((string)arg.name, true);
-            data.SetValue((string)arg.property, (string)arg.newValue);
-            man.WriteWorkcenter(data);
-            return data;
+            var persister = ServiceManager.GetService<ValueContainerPersisterService>();
+            var updatedWorkcenter = persister.UpdateValueContainer(typeof(GO.Global.Workcenters.Workcenter), (string)data.WorkcenterName, (string)arg.property, (object)arg.newValue, "userId", $"Updating {arg.property} value");
+            return updatedWorkcenter;
         }
     }
 }

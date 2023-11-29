@@ -22,7 +22,7 @@ namespace GuideRecipeBackend.AuditTrail
         public ValueContainer CreateValueContainer(Type objectType, string parentObjectId)
         {
             ValueContainer valueContainer = new ValueContainer();
-            var man = GO.AppManager.Current.ServiceManager.GetService<IWorkcenterDatabase>();
+            var workDB = GO.AppManager.Current.ServiceManager.GetService<IWorkcenterDatabase>();
 
             if (objectType == typeof(Workcenter))
             {
@@ -32,7 +32,7 @@ namespace GuideRecipeBackend.AuditTrail
                     WorkcenterId = Guid.NewGuid(),
                     Created = DateTime.Now,
                 };
-                man.WriteWorkcenter((WorkcenterData)valueContainer);
+                workDB.WriteWorkcenter((WorkcenterData)valueContainer);
                 return valueContainer;
             }
             return null;
@@ -40,11 +40,11 @@ namespace GuideRecipeBackend.AuditTrail
 
         public void DeleteValueContainer(Type objectType, string objectId)
         {
-            var man = GO.AppManager.Current.ServiceManager.GetService<IWorkcenterDatabase>();
+            var workDB = GO.AppManager.Current.ServiceManager.GetService<IWorkcenterDatabase>();
             if(objectType == typeof(Workcenter))
             {
-                var workcenter = man.GetWorkcenter(objectId, true);
-                man.DeleteWorkcenter(workcenter);
+                var workcenter = workDB.GetWorkcenter(objectId, true);
+                workDB.DeleteWorkcenter(workcenter);
             }
         }
 
@@ -53,9 +53,19 @@ namespace GuideRecipeBackend.AuditTrail
             return container.GetValue("workcenterId");
         }
 
-        public object UpdateValueContainer(Type objectType, string objectId, string changedPropertyName, object changedPropertyValue)
+        public object UpdateValueContainer(Type objectType, string objectName, string changedPropertyName, object changedPropertyValue)
         {
-            throw new NotImplementedException();
+            var workDB = GO.AppManager.Current.ServiceManager.GetService<IWorkcenterDatabase>();
+            ValueContainer valueContainer = null;
+            if (objectType == typeof(Workcenter))
+                valueContainer = workDB.GetWorkcenter(objectName, true);
+
+            var oldValue = valueContainer.GetValue(changedPropertyName);
+            if (oldValue?.Equals(changedPropertyValue) ?? false) return oldValue;
+
+            valueContainer.SetValue(changedPropertyName, changedPropertyValue);
+            workDB.WriteWorkcenter((WorkcenterData)valueContainer);
+            return valueContainer;
         }
 
         public void UpdateValueContainerCollection(Type parentType, string parentId, string collectionName, string childId, string updateType)
