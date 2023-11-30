@@ -30,6 +30,7 @@ using GO.Mes.AuditTrail;
 using GO.Global.AuditTrail;
 using GuideRecipeBackend.AuditTrail;
 using System.Activities.Validation;
+using GO.Mes;
 
 namespace GuideRecipeBackend
 {
@@ -40,6 +41,7 @@ namespace GuideRecipeBackend
             FuncSet.Add("getAllWorkcenters", onGetAllWorkcenters);
             FuncSet.Add("getAllLocations", onGetAllLocations);
             FuncSet.Add("getAllWorkcenterTypes", onGetAllWorkcenterTypes);
+            FuncSet.Add("getAllAbilities", onGetAllAbilities);
             FuncSet.Add("createWorkcenter", onCreateWorkcenter);
             FuncSet.Add("deleteWorkcenter", onDeleteWorkcenter);
             FuncSet.Add("updateWorkcenterProperty", onUpdateWorkcenterProperty);
@@ -81,6 +83,12 @@ namespace GuideRecipeBackend
         {
             var man = ServiceManager.GetService<ILocationManager>();
             return man.GetLocations();
+        }
+
+        private object onGetAllAbilities(dynamic arg)
+        {
+            var man = ServiceManager.GetService<IAbilityClient>();
+            return man.GetAbilities();
         }
 
         private object onCreateWorkcenter(dynamic arg)
