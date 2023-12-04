@@ -9,41 +9,40 @@ using System.Text;
 using System.Threading.Tasks;
 using GO.Global.Workcenters;
 using GO.Oms.Shared.DataLayer;
+using GO.Oms.Shared.Workcenter;
 
 namespace GuideRecipeBackend.AuditTrail
 {
     [
         ValueContainerObjectType(new[] {
-            typeof(Workcenter),
+            typeof(GO.Global.Workcenters.Workcenter),
         })
     ]
     public class WorkcentersDataPersister : IValueContainerPersister
     {
         public ValueContainer CreateValueContainer(Type objectType, string parentObjectId)
         {
-            ValueContainer valueContainer = new ValueContainer();
-            var workDB = GO.AppManager.Current.ServiceManager.GetService<IWorkcenterDatabase>();
-
-            if (objectType == typeof(Workcenter))
+            if (objectType == typeof(GO.Global.Workcenters.Workcenter))
             {
-                valueContainer = new WorkcenterData()
-                {
-                    Workcenter = parentObjectId,
-                    WorkcenterId = Guid.NewGuid(),
-                    Created = DateTime.Now,
-                };
-                workDB.WriteWorkcenter((WorkcenterData)valueContainer);
-                return valueContainer;
+                ValueContainer valueContainer = null;
+                var man = GO.AppManager.Current.ServiceManager.GetService<IWorkcenterManager>();
+                var workcenter = man.CreateWorkcenter();
+                workcenter.WorkcenterName = parentObjectId;
+                workcenter.WorkcenterId = Guid.NewGuid();
+                workcenter.Created = DateTime.Now;
+                man.WriteWorkcenter(workcenter);
+                
+                return (ValueContainer)workcenter;
             }
             return null;
         }
 
         public void DeleteValueContainer(Type objectType, string objectId)
         {
-            var workDB = GO.AppManager.Current.ServiceManager.GetService<IWorkcenterDatabase>();
-            if(objectType == typeof(Workcenter))
+            var workDB = GO.AppManager.Current.ServiceManager.GetService<IWorkcenterManager>();
+            if (objectType == typeof(GO.Global.Workcenters.Workcenter))
             {
-                var workcenter = workDB.GetWorkcenter(objectId, true);
+                var workcenter = workDB.GetWorkcenter(Guid.Parse(objectId), true);
                 workDB.DeleteWorkcenter(workcenter);
             }
         }
@@ -53,23 +52,26 @@ namespace GuideRecipeBackend.AuditTrail
             return container.GetValue("workcenterId");
         }
 
-        public object UpdateValueContainer(Type objectType, string objectName, string changedPropertyName, object changedPropertyValue)
+        public object UpdateValueContainer(Type objectType, string objectId, string changedPropertyName, object changedPropertyValue)
         {
-            var workDB = GO.AppManager.Current.ServiceManager.GetService<IWorkcenterDatabase>();
-            ValueContainer valueContainer = null;
-            if (objectType == typeof(Workcenter))
-                valueContainer = workDB.GetWorkcenter(objectName, true);
+            var workDB = GO.AppManager.Current.ServiceManager.GetService<IWorkcenterManager>();
+            IWorkcenter workcenter = null;
+            if (objectType == typeof(GO.Global.Workcenters.Workcenter))
+                workcenter = workDB.GetWorkcenter(Guid.Parse(objectId), true);
 
-            var oldValue = valueContainer.GetValue(changedPropertyName);
-            if (oldValue?.Equals(changedPropertyValue) ?? false) return oldValue;
+            var oldValue = workcenter.GetValue(changedPropertyName);
+            if (oldValue != null && oldValue.Equals(changedPropertyValue)) return oldValue;
 
-            valueContainer.SetValue(changedPropertyName, changedPropertyValue);
-            workDB.WriteWorkcenter((WorkcenterData)valueContainer);
-            return valueContainer;
+
+            workcenter.SetValue(changedPropertyName, changedPropertyValue);
+            workDB.WriteWorkcenter(workcenter);
+            return oldValue?.ToString();
         }
 
         public void UpdateValueContainerCollection(Type parentType, string parentId, string collectionName, string childId, string updateType)
         {
+            var man = GO.AppManager.Current.ServiceManager.GetService<IWorkcenterManager>();
+            //man.RegisterResource(resourceType:);
             throw new NotImplementedException();
         }
     }

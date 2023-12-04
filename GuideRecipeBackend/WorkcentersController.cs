@@ -101,17 +101,15 @@ namespace GuideRecipeBackend
         private object onDeleteWorkcenter(dynamic arg)
         {
             var persister = ServiceManager.GetService<ValueContainerPersisterService>();
-            persister.DeleteValueContainer(typeof(GO.Global.Workcenters.Workcenter), (string)arg.name, "userId", "Deleting a Workcenter");
-            return null;
+            persister.DeleteValueContainer(typeof(GO.Global.Workcenters.Workcenter), (string)arg.id, "userId", "Deleting a Workcenter");
+            return arg.id;
         }
 
         private object onUpdateWorkcenterProperty(dynamic arg)
         {
-            var man = ServiceManager.GetService<GO.Global.Workcenters.WorkcenterManager>();
-            var data = man.GetWorkcenter((string)arg.name, true);
             var persister = ServiceManager.GetService<ValueContainerPersisterService>();
-            var updatedWorkcenter = persister.UpdateValueContainer(typeof(GO.Global.Workcenters.Workcenter), (string)data.WorkcenterName, (string)arg.property, (object)arg.newValue, "userId", $"Updating {arg.property} value");
-            return updatedWorkcenter;
+            var updatedWorkcenter = persister.UpdateValueContainer(typeof(GO.Global.Workcenters.Workcenter), (string)arg.id, (string)arg.property, (object)arg.newValue, "userId", $"Updating {arg.property} value");
+            return null;
         }
     }
 }
