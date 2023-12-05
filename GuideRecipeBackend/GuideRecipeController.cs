@@ -26,6 +26,7 @@ namespace GuideRecipeBackend
             FuncSet.Add("getAllRecipes", onGetAllRecipes);
             FuncSet.Add("getActionTypes", onGetActionTypes);
             FuncSet.Add("getRecipeActions", onGetRecipeActions);
+            FuncSet.Add("getRecipeVariables", onGetRecipeVariables);
         }
 
         [HttpPost]
@@ -113,8 +114,11 @@ namespace GuideRecipeBackend
             return result;
         }
 
-        
-
-        
+        private object onGetRecipeVariables(dynamic arg)
+        {
+            var man = ServiceManager.GetService<GuideManager>();
+            var action = man.LoadAction(Guid.Parse((string)arg.recipeId));
+            return action.Variables;
+        }
     }
 }

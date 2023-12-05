@@ -89,12 +89,12 @@ namespace GuideRecipeBackend
         {
             var man = ServiceManager.GetService<IAbilityClient>();
             return man.GetAbilities();
-        }
+        }        
 
         private object onCreateWorkcenter(dynamic arg)
         {
             var persister = ServiceManager.GetService<ValueContainerPersisterService>();
-            var workcenter = persister.CreateValueContainer(typeof(GO.Global.Workcenters.Workcenter), "userId", remark:"Create new workcenter", (string)arg.name, auxData:"Creating a new Workcenter");
+            var workcenter = persister.CreateValueContainer(typeof(GO.Global.Workcenters.Workcenter), "userId", remark: "Create new workcenter", (string)arg.name, auxData: "Creating a new Workcenter");
             return workcenter;
         }
 
