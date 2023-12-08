@@ -24,14 +24,11 @@ namespace GuideRecipeBackend.AuditTrail
         {
             if (objectType == typeof(GO.Global.Workcenters.Workcenter))
             {
-                ValueContainer valueContainer = null;
                 var man = GO.AppManager.Current.ServiceManager.GetService<IWorkcenterManager>();
                 var workcenter = man.CreateWorkcenter();
-                workcenter.WorkcenterName = parentObjectId;
-                workcenter.WorkcenterId = Guid.NewGuid();
-                workcenter.Created = DateTime.Now;
+                workcenter.WorkcenterName = "";
                 man.WriteWorkcenter(workcenter);
-                
+
                 return (ValueContainer)workcenter;
             }
             return null;
@@ -62,7 +59,6 @@ namespace GuideRecipeBackend.AuditTrail
             var oldValue = workcenter.GetValue(changedPropertyName);
             if (oldValue != null && oldValue.Equals(changedPropertyValue)) return oldValue;
 
-
             workcenter.SetValue(changedPropertyName, changedPropertyValue);
             workDB.WriteWorkcenter(workcenter);
             return oldValue?.ToString();
@@ -70,8 +66,6 @@ namespace GuideRecipeBackend.AuditTrail
 
         public void UpdateValueContainerCollection(Type parentType, string parentId, string collectionName, string childId, string updateType)
         {
-            var man = GO.AppManager.Current.ServiceManager.GetService<IWorkcenterManager>();
-            //man.RegisterResource(resourceType:);
             throw new NotImplementedException();
         }
     }
