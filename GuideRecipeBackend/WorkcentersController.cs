@@ -31,6 +31,7 @@ using GO.Global.AuditTrail;
 using GuideRecipeBackend.AuditTrail;
 using System.Activities.Validation;
 using GO.Mes;
+using System.Resources;
 
 namespace GuideRecipeBackend
 {
@@ -43,6 +44,7 @@ namespace GuideRecipeBackend
             FuncSet.Add("getAllWorkcenterTypes", onGetAllWorkcenterTypes);
             FuncSet.Add("getAllAbilities", onGetAllAbilities);
             FuncSet.Add("createWorkcenter", onCreateWorkcenter);
+            FuncSet.Add("createWorkTask", onCreateWorkTask);
             FuncSet.Add("deleteWorkcenter", onDeleteWorkcenter);
             FuncSet.Add("updateWorkcenterProperty", onUpdateWorkcenterProperty);
         }
@@ -89,27 +91,39 @@ namespace GuideRecipeBackend
         {
             var man = ServiceManager.GetService<IAbilityClient>();
             return man.GetAbilities();
-        }        
+        }
 
         private object onCreateWorkcenter(dynamic arg)
         {
             var persister = ServiceManager.GetService<ValueContainerPersisterService>();
-            var workcenter = persister.CreateValueContainer(typeof(GO.Global.Workcenters.Workcenter), "userId", remark: "Create new workcenter", auxData: "Creating a new Workcenter");
+            var workcenter = persister.CreateValueContainer(typeof(GO.Global.Workcenters.Workcenter), userId: (string)arg.userId, remark: "Create new workcenter");
+            return workcenter;
+        }
+
+        private object onCreateWorkTask(dynamic arg)
+        {
+            var man = ServiceManager.GetService<IWorkcenterManager>();
+            var workcenter = man.GetWorkcenter((Guid)(arg.workcenterId), true);
+            IWorkcenterResource newWorkTask = new WorkcenterResource();
+            newWorkTask.ResourceName = (string)arg.taskName;
+            workcenter.WorkcenterResources.Add(newWorkTask);
+            man.WriteWorkcenter(workcenter);
             return workcenter;
         }
 
         private object onDeleteWorkcenter(dynamic arg)
         {
             var persister = ServiceManager.GetService<ValueContainerPersisterService>();
-            persister.DeleteValueContainer(typeof(GO.Global.Workcenters.Workcenter), (string)arg.id, "userId", "Deleting a Workcenter");
+            persister.DeleteValueContainer(typeof(GO.Global.Workcenters.Workcenter), (string)arg.id, (string)arg.userId, "Deleting a Workcenter");
             return arg.id;
         }
 
         private object onUpdateWorkcenterProperty(dynamic arg)
         {
             var persister = ServiceManager.GetService<ValueContainerPersisterService>();
-            var updatedWorkcenter = persister.UpdateValueContainer(typeof(GO.Global.Workcenters.Workcenter), (string)arg.id, (string)arg.property, (object)arg.newValue, "userId", $"Updating {arg.property} value");
-            return updatedWorkcenter;
+            persister.UpdateValueContainer(typeof(GO.Global.Workcenters.Workcenter), 
+                (string)arg.id, (string)arg.property, (object)arg.newValue, (string)arg.userId, $"Updating {arg.property} value");
+            return null;
         }
     }
 }
