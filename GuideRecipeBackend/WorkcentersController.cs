@@ -44,8 +44,9 @@ namespace GuideRecipeBackend
             FuncSet.Add("getAllWorkcenterTypes", onGetAllWorkcenterTypes);
             FuncSet.Add("getAllAbilities", onGetAllAbilities);
             FuncSet.Add("createWorkcenter", onCreateWorkcenter);
-            FuncSet.Add("createWorkTask", onCreateWorkTask);
             FuncSet.Add("deleteWorkcenter", onDeleteWorkcenter);
+            FuncSet.Add("createWorkTask", onCreateWorkTask);
+            FuncSet.Add("deleteWorkTask", onDeleteWorkTask);
             FuncSet.Add("updateWorkcenterProperty", onUpdateWorkcenterProperty);
         }
 
@@ -100,6 +101,14 @@ namespace GuideRecipeBackend
             return workcenter;
         }
 
+
+        private object onDeleteWorkcenter(dynamic arg)
+        {
+            var persister = ServiceManager.GetService<ValueContainerPersisterService>();
+            persister.DeleteValueContainer(typeof(GO.Global.Workcenters.Workcenter), (string)arg.id, (string)arg.userId, "Deleting a Workcenter");
+            return arg.id;
+        }
+
         private object onCreateWorkTask(dynamic arg)
         {
             var man = ServiceManager.GetService<IWorkcenterManager>();
@@ -108,14 +117,17 @@ namespace GuideRecipeBackend
             newWorkTask.ResourceName = (string)arg.taskName;
             workcenter.WorkcenterResources.Add(newWorkTask);
             man.WriteWorkcenter(workcenter);
-            return workcenter;
+            return workcenter.WorkcenterResources;
         }
 
-        private object onDeleteWorkcenter(dynamic arg)
+        private object onDeleteWorkTask(dynamic arg)
         {
-            var persister = ServiceManager.GetService<ValueContainerPersisterService>();
-            persister.DeleteValueContainer(typeof(GO.Global.Workcenters.Workcenter), (string)arg.id, (string)arg.userId, "Deleting a Workcenter");
-            return arg.id;
+            var man = ServiceManager.GetService<IWorkcenterManager>();
+            var workcenter = man.GetWorkcenter((Guid)(arg.workcenterId), true);
+            var removingTask = workcenter.WorkcenterResources.Find(x => x.WorkcenterResourceId.ToString() == (string)arg.taskId);
+            workcenter.WorkcenterResources.Remove(removingTask);
+            man.WriteWorkcenter(workcenter);
+            return workcenter.WorkcenterResources;
         }
 
         private object onUpdateWorkcenterProperty(dynamic arg)
