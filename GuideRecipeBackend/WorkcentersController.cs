@@ -32,6 +32,7 @@ using GuideRecipeBackend.AuditTrail;
 using System.Activities.Validation;
 using GO.Mes;
 using System.Resources;
+using GO.ProductionAssets.Datalayer;
 
 namespace GuideRecipeBackend
 {
@@ -72,14 +73,10 @@ namespace GuideRecipeBackend
 
         private object onGetAllWorkcenterTypes(dynamic arg)
         {
-            return new List<string>
-            {
-                GO.ProductionAssets.Datalayer.WorkcenterTypes.Enterprise,
-                GO.ProductionAssets.Datalayer.WorkcenterTypes.Site,
-                GO.ProductionAssets.Datalayer.WorkcenterTypes.Area,
-                GO.ProductionAssets.Datalayer.WorkcenterTypes.Workcenter,
-                GO.ProductionAssets.Datalayer.WorkcenterTypes.Workcell
-            };
+            var allWorkcenterTypes = typeof(WorkcenterTypes).GetFields()
+            .Select(f => (string)f.GetValue(null)).ToList();
+
+            return allWorkcenterTypes;
         }
 
         private object onGetAllLocations(dynamic arg)
